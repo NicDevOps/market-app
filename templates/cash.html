@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    cash
+{% endblock %}
+
+{% block main %}
+
+    <div class="section">
+
+        <h2>Cash</h2>
+
+        {{balance | usd}}
+
+    </div>
+
+{% endblock %}

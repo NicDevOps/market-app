@@ -1,1 +1,7 @@
 flask
+pandas
+patterns
+python-binance
+cs50
+flask_session
+werkzeug

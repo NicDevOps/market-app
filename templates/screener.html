@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    quote
+{% endblock %}
+
+{% block main %}
+
+<h1>Candlestick Screener</h1>
+
+<form>
+    <select name="pattern">
+        {% for pattern in patterns %}
+
+            <option value="{{ pattern }}">{{ patterns[pattern] }}</option>
+
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="scan">
+</form>
+
+<table>
+
+    <tr>
+        <th>
+            Symbol
+        </th>
+        <th>
+            Signal
+        </th>
+    </tr>
+    {% for stock in stocks %}
+        {% if stocks[stock][current_pattern] %}
+            <tr>
+                <td>{{ stock }}</td>
+                <td class="{{stocks[stock][current_pattern]}}">{{ stocks[stock][current_pattern] }}</td>
+            </tr>
+            <!-- <script src="{{ url_for('static', filename='chart.js') }}"></script> -->
+        {% endif %}
+
+    {% endfor %}
+</table>
+
+
+{% endblock %}

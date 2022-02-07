@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    index
+{% endblock %}
+
+{% block main %}
+
+    <div class="section">
+
+        <h2>Stocks</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Shares</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                <tr>
+                    <td>{{stock.symbol}}</td>
+                    <td>{{stock.shares_qty}}</td>
+                    <td>{{stock.price | usd}}</td>
+                    <td>{{stock.total | usd}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="section">
+
+        <h2>Cash</h2>
+    
+        {{balance | usd}}
+
+    </div>
+    <div class="section">
+
+        <h2>Total</h2>
+    
+        {{total | usd}}
+
+    </div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    history
+{% endblock %}
+
+{% block main %}
+
+    <div class="section">
+
+        <h2>Order History</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Symbol</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{order.order_type}}</td>
+                    <td>{{order.symbol}}</td>
+                    <td>{{order.shares_num}}</td>
+                    <td>{{order.share_price | usd}}</td>
+                    <td>{{order.total | usd}}</td>
+                    <td>{{order.date}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
