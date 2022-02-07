@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: market-app
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  # ingressClassName: nginx-example
+  rules:
+  - host: "market-app.local"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: market-app
+            port:
+              number: 5000
