@@ -390,20 +390,20 @@ def snapshot():
     end="2022.23.1"
     timeframe="1d"
 
-    with open("data/datasets.csv") as f:
-        companies = f.read().splitlines()
-        try:
-            for company in companies:
-                symbol = company.split(',')[0]
-                df = pd.DataFrame(client.get_historical_klines(symbol, timeframe,start,end))
-                df=df.iloc[:,:6]
-                df.columns=["Date","Open","High","Low","Close","Volume"]
-                df=df.set_index("Date")
-                df.index=pd.to_datetime(df.index,unit="ms")
-                df=df.astype("float")
-                df.to_csv('data/daily_year/{}'.format(symbol))
-        except:
-            pass
+    exchange_info = client.get_exchange_info()
+        
+    try:
+        for s in exchange_info['symbols']:
+            symbol = s['symbol']
+            df = pd.DataFrame(client.get_historical_klines(symbol, timeframe,start,end))
+            df=df.iloc[:,:6]
+            df.columns=["Date","Open","High","Low","Close","Volume"]
+            df=df.set_index("Date")
+            df.index=pd.to_datetime(df.index,unit="ms")
+            df=df.astype("float")
+            df.to_csv('data/daily_year/{}'.format(symbol))
+    except:
+        pass
     
     return render_template("screener.html")
 
