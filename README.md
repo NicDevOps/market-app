@@ -1,5 +1,12 @@
 # market-app
 
+
+# Welcome to my market trade platform github project
+### This platform is use to study the market flow by the use of candlestick graph with javascript
+### and will scan all market for candlestick pattern reconition !
+
+
+
 ```
 nc -zv test-nginx 8080
 curl http://test-nginx:8080
