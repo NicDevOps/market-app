@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: market-app
-        image: nicdevops/market-app:0.1
+        image: nicdevops/market-app:0.4
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
         resources:

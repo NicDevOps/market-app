@@ -2,7 +2,8 @@ import os
 import datetime
 import json
 import csv
-# import talib
+import talib
+# import logging
 import pandas as pd
 from patterns import patterns
 from binance.client import Client
@@ -11,11 +12,12 @@ from flask import Flask, flash, redirect, render_template, request, session, jso
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from helpers import apology, login_required, lookup, usd
 
 # Configure application
 app = Flask(__name__)
+
+# app.logger.setLevel(logging.INFO)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -339,10 +341,15 @@ def chart():
 @app.route("/screener", methods=["GET", "POST"])
 @login_required
 def screen():
+    api_key = os.environ.get("api_key")
+    api_secret = os.environ.get("api_secret")
+    client = Client(api_key, api_secret)
+
     stocks = {}
-    with open('data/datasets.csv') as f:
-        for row in csv.reader(f):
-            stocks[row[0]] = {'Currency' : 'crypto'}
+    exchange_info = client.get_exchange_info()
+
+    for s in exchange_info['symbols']:
+            stocks[s['symbol']] = {'Currency' : 'crypto'}
     
     current_pattern = request.args.get('pattern', None)
     if current_pattern:
