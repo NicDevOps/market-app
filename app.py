@@ -341,22 +341,18 @@ def chart():
 @app.route("/screener", methods=["GET", "POST"])
 @login_required
 def screen():
-    api_key = os.environ.get("api_key")
-    api_secret = os.environ.get("api_secret")
-    client = Client(api_key, api_secret)
-
     stocks = {}
-    exchange_info = client.get_exchange_info()
-
-    for s in exchange_info['symbols']:
-            stocks[s['symbol']] = {'Currency' : 'crypto'}
+    with open('data/datasets.csv') as f:
+        for row in csv.reader(f):
+            stocks[row[0]] = {'Currency' : 'crypto'}
     
     current_pattern = request.args.get('pattern', None)
+
     if current_pattern:
+        pattern_function = getattr(talib, current_pattern)
         datafiles = os.listdir('data/daily_year')
         for filename in datafiles:
             df = pd.read_csv('data/daily_year/{}'.format(filename))
-            pattern_function = getattr(talib, current_pattern)
 
             symbol = filename.split('.')[0]
             
@@ -390,21 +386,20 @@ def snapshot():
     end="2022.23.1"
     timeframe="1d"
 
-    exchange_info = client.get_exchange_info()
-        
-    try:
-        for s in exchange_info['symbols']:
-            symbol = s['symbol']
-            df = pd.DataFrame(client.get_historical_klines(symbol, timeframe,start,end))
-            df=df.iloc[:,:6]
-            df.columns=["Date","Open","High","Low","Close","Volume"]
-            df=df.set_index("Date")
-            df.index=pd.to_datetime(df.index,unit="ms")
-            df=df.astype("float")
-            df.to_csv('data/daily_year/{}'.format(symbol))
-    except:
-        pass
+    with open("data/datasets.csv") as f:
+        companies = f.read().splitlines()
+        try:
+            for company in companies:
+                symbol = company.split(',')[0]
+                df = pd.DataFrame(client.get_historical_klines(symbol, timeframe,start,end))
+                df=df.iloc[:,:6]
+                df.columns=["Date","Open","High","Low","Close","Volume"]
+                df=df.set_index("Date")
+                df.index=pd.to_datetime(df.index,unit="ms")
+                df=df.astype("float")
+                df.to_csv('data/daily_year/{}'.format(symbol))
+        except:
+            pass
     
     return render_template("screener.html")
-
     

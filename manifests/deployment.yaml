@@ -16,8 +16,11 @@ spec:
     spec:
       containers:
       - name: market-app
-        image: nicdevops/market-app:0.5
+        image: nicdevops/market-app:0.3
         imagePullPolicy: Always
+        volumeMounts:
+          - name: data-volume
+            mountPath: /data
         ports:
         - containerPort: 5000
         resources:
@@ -27,3 +30,7 @@ spec:
           limits:
             memory: "128Mi"
             cpu: "500m"
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: market-app
