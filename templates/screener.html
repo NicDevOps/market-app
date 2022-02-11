@@ -20,7 +20,7 @@
     <input type="submit" value="scan">
 </form>
 
-<table>
+<!-- <table>
 
     <tr>
         <th>
@@ -40,7 +40,30 @@
         {% endif %}
 
     {% endfor %}
-</table>
+</table> -->
 
+<table>
+
+    <tr>
+        <th>
+            Symbol
+        </th>
+        <th>
+            Signal
+        </th>
+    </tr>
+    {% for stock in stocks %}
+        {% if stocks[stock][current_pattern] %}
+            <tr>
+                <!-- <td>{{ stock }}</td> -->
+                <!-- <td><a href="/static/screen.html?stock={{ stock }}">{{ stock }}</a></td> -->
+                <td><a href="/static/stock.html?stock={{ stock }}">{{ stock }}</a></td>
+                <td class="{{stocks[stock][current_pattern]}}">{{ stocks[stock][current_pattern] }}</td>
+            </tr>
+        {% endif %}
+
+    {% endfor %}
+    
+</table>
 
 {% endblock %}

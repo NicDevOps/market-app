@@ -12,7 +12,7 @@ from flask import Flask, flash, redirect, render_template, request, session, jso
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import apology, login_required, lookup, usd
+from helpers import apology, login_required, lookup, usd, get_exchange
 
 # Configure application
 app = Flask(__name__)
@@ -338,21 +338,87 @@ def chart():
     return jsonify(processed_candles)
 
 
+# @app.route("/screener", methods=["GET", "POST"])
+# @login_required
+# def screen():
+#     stocks = {}
+#     with open('data/datasets.csv') as f:
+#         for row in csv.reader(f):
+#             stocks[row[0]] = {'Currency' : 'crypto'}
+    
+#     current_pattern = request.args.get('pattern', None)
+
+#     if current_pattern:
+#         pattern_function = getattr(talib, current_pattern)
+#         datafiles = os.listdir('data/daily_year')
+#         for filename in datafiles:
+#             df = pd.read_csv('data/daily_year/{}'.format(filename))
+
+#             symbol = filename.split('.')[0]
+            
+#             try:
+#                 result = pattern_function(df['Open'], df['High'], df['Low'], df['Close'])
+#                 last = result.tail(1).values[0]
+#                 # if last != 0:
+#                 #     print('{} triggered {}, results = {}'.format(filename, current_pattern, last))
+#                 if last > 0:
+#                     stocks[symbol][current_pattern] = 'bullish'
+#                 elif last < 0:
+#                     stocks[symbol][current_pattern] = 'bearish'
+#                 else:
+#                     stocks[symbol][current_pattern] = None
+
+#             except:
+#                 pass
+
+#     return render_template("screener.html", patterns=patterns, stocks=stocks, current_pattern=current_pattern)
+
+# @app.route("/snapshot", methods=["GET", "POST"])
+# @login_required
+# def snapshot():
+
+#     api_key = os.environ.get("api_key")
+#     api_secret = os.environ.get("api_secret")
+
+#     client = Client(api_key, api_secret)
+
+#     start="2020.10.1"
+#     end="2022.23.1"
+#     timeframe="1d"
+
+#     with open("data/datasets.csv") as f:
+#         companies = f.read().splitlines()
+#         try:
+#             for company in companies:
+#                 symbol = company.split(',')[0]
+#                 df = pd.DataFrame(client.get_historical_klines(symbol, timeframe,start,end))
+#                 df=df.iloc[:,:6]
+#                 df.columns=["Date","Open","High","Low","Close","Volume"]
+#                 df=df.set_index("Date")
+#                 df.index=pd.to_datetime(df.index,unit="ms")
+#                 df=df.astype("float")
+#                 df.to_csv('data/daily_year/{}'.format(symbol))
+#         except:
+#             pass
+    
+#     return render_template("screener.html")
+
 @app.route("/screener", methods=["GET", "POST"])
 @login_required
 def screen():
     stocks = {}
-    with open('data/datasets.csv') as f:
-        for row in csv.reader(f):
-            stocks[row[0]] = {'Currency' : 'crypto'}
+    symbols = get_exchange()
+
+    for s in symbols:
+        stocks[s] = {'Currency' : 'crypto'}
     
     current_pattern = request.args.get('pattern', None)
 
     if current_pattern:
         pattern_function = getattr(talib, current_pattern)
-        datafiles = os.listdir('data/daily_year')
+        datafiles = os.listdir('/data')
         for filename in datafiles:
-            df = pd.read_csv('data/daily_year/{}'.format(filename))
+            df = pd.read_csv('/data/{}'.format(filename))
 
             symbol = filename.split('.')[0]
             
@@ -373,7 +439,7 @@ def screen():
 
     return render_template("screener.html", patterns=patterns, stocks=stocks, current_pattern=current_pattern)
 
-@app.route("/snapshot", methods=["GET", "POST"])
+@app.route("/snapshot")
 @login_required
 def snapshot():
 
@@ -386,20 +452,56 @@ def snapshot():
     end="2022.23.1"
     timeframe="1d"
 
-    with open("data/datasets.csv") as f:
-        companies = f.read().splitlines()
-        try:
-            for company in companies:
-                symbol = company.split(',')[0]
-                df = pd.DataFrame(client.get_historical_klines(symbol, timeframe,start,end))
-                df=df.iloc[:,:6]
-                df.columns=["Date","Open","High","Low","Close","Volume"]
-                df=df.set_index("Date")
-                df.index=pd.to_datetime(df.index,unit="ms")
-                df=df.astype("float")
-                df.to_csv('data/daily_year/{}'.format(symbol))
-        except:
-            pass
+    symbols = get_exchange()
     
+    try:
+        for s in symbols:
+            print(s)
+            df = pd.DataFrame(client.get_historical_klines(s, timeframe,start,end))
+            if df.empty:
+                print('Your df is empty...')
+                continue
+            print(df)
+            df=df.iloc[:,:6]
+            df.columns=["Date","Open","High","Low","Close","Volume"]
+            df=df.set_index("Date")
+            df.index=pd.to_datetime(df.index,unit="ms")
+            df=df.astype("float")
+            df.to_csv('/data/{}'.format(s))
+    except:
+        pass
     return render_template("screener.html")
+
+
+@app.route("/get_graph", methods=["GET", "POST"])
+@login_required
+def get_graph():
+    stock = request.args.get('stock', None)
+
+    api_key = os.environ.get("API_KEY")
+    api_secret = os.environ.get("API_SECRET")
+    client = Client(api_key, api_secret)
+
+    processed_candles = []
+
+    start="2020.10.1"
+    end="2022.23.1"
+    timeframe="1d"
+
+    candles = client.get_historical_klines(stock, timeframe,start,end)
+
+    for data in candles:
+        
+        candle = {
+            "time": data[0] / 1000, 
+            "open": data[1], 
+            "high": data[2], 
+            "low": data[3], 
+            "close": data[4] 
+        }
+
+        processed_candles.append(candle)
+    # print("testing JSON " + str(type(processed_candles)))
+    # print(processed_candles)
+    return jsonify(processed_candles)
     

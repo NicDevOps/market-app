@@ -16,4 +16,5 @@ docker build -t nicdevops/market-app .
 docker run --rm -p 5000:5000 nicdevops/market-app
 http://127.0.0.1:5000/login
 kubectl exec -it market-app-9c56f549d-qkdzd -- bash
+kubectl patch pv pvc-4a836b58-49ed-41e7-b33e-8e9194893aa1 --type json -p '[{"op": "remove", "path": "/spec/claimRef"}]'
 ```

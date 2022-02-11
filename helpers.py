@@ -85,18 +85,16 @@ def iex_lookup(symbol):
     except (KeyError, TypeError, ValueError):
         return None
 
-
-def get_klines(symbol, start, end):
+def get_exchange():
     api_key = os.environ.get("api_key")
     api_secret = os.environ.get("api_secret")
 
     client = Client(api_key, api_secret)
 
-    asset = symbol
-    start_date = start
-    end_date = end
-    timeframe = "1d"
+    exchange_info = client.get_exchange_info()
+    symbols = []
 
-    data  = client.get_historical_klines(asset, timeframe, start_date, end_date)
+    for s in exchange_info['symbols']:
+        symbols.append(s['symbol'])
 
-    return data
+    return symbols

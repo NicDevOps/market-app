@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: market-app
-        image: nicdevops/market-app:0.3
+        image: nicdevops/market-app:0.2
         imagePullPolicy: Always
         volumeMounts:
           - name: data-volume
